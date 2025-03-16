@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace CloudSoft.Models;
+namespace WeLoveMushrooms.Models;
 
 public class Subscriber
 {
