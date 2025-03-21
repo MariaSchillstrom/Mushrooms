@@ -1,18 +1,12 @@
-using WeLoveMushrooms.Services;
 using WeLoveMushrooms.Models;
 using Microsoft.AspNetCore.Mvc;
 
-namespace WeLoveMushrooms.Controllers;
+namespace CloudSoft.Controllers;
 
 public class NewsletterController : Controller
 {
-    private readonly INewsletterService _newsletterService;
-
-    public NewsletterController(INewsletterService newsletterService)
-    {
-        // Inject the INewsletterService via the constructor from the DI container
-        _newsletterService = newsletterService;
-    }
+    // Create a "database" of subscribers for demonstration purposes
+    private static List<Subscriber> _subscribers = [];
 
     [HttpGet]
     public IActionResult Subscribe()
@@ -21,7 +15,7 @@ public class NewsletterController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> Subscribe(Subscriber subscriber)
+    public IActionResult Subscribe(Subscriber subscriber)
     {
         // Validate the model
         if (!ModelState.IsValid)
@@ -30,39 +24,45 @@ public class NewsletterController : Controller
         }
 
         // Check if the email is already subscribed and return a general model level error
-        var result = await _newsletterService.SignUpForNewsletterAsync(subscriber);
-        if (!result.IsSuccess)
+        if (_subscribers.Any(s => s.Email == subscriber.Email))
         {
-            ModelState.AddModelError("Email", result.Message);
+            ModelState.AddModelError("Email", "The email is already subscribed. Please use a different email.");
             return View(subscriber);
         }
+
+        // Add the subscriber to the list
+        _subscribers.Add(subscriber);
 
         // Write to the console
         Console.WriteLine($"New subscription - Name: {subscriber.Name} Email: {subscriber.Email}");
         
         // Send a message to the user
-        TempData["SuccessMessage"] = result.Message;
+        TempData["SuccessMessage"] = $"Thank you for subscribing, {subscriber.Name}! You will receive our newsletter at {subscriber.Email}";
 
         // Return the view (using the POST-REDIRECT-GET pattern)
-        return RedirectToAction(nameof(Subscribe));
+        return RedirectToAction(nameof(Subscribe));  // use nameof() to find the action by name during compile time
     }
+
+    
 
     [HttpGet]
-    public async Task<IActionResult> Subscribers()
+    public IActionResult Subscribers()
     {
-        var subscribers = await _newsletterService.GetActiveSubscribersAsync();
-        return View(subscribers);
+        return View(_subscribers);
     }
 
-    [HttpPost]
+        [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Unsubscribe(string email)
+    public IActionResult Unsubscribe(string email)
     {
-        var result = await _newsletterService.OptOutFromNewsletterAsync(email);
-        if (result.IsSuccess)
+        var subscriber = _subscribers.FirstOrDefault(s => s.Email == email);
+        if (subscriber != null)
         {
-            TempData["SuccessMessage"] = result.Message;
+            _subscribers.Remove(subscriber);
+            TempData["SuccessMessage"] = $"Successfully unsubscribed {email} from the newsletter.";
         }
         return RedirectToAction(nameof(Subscribers));
     }
+    
+
 }
