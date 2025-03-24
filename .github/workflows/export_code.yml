@@ -1,0 +1,30 @@
+name: Export Code to Markdown
+
+on:
+  workflow_dispatch:  # Trigger för manuell körning från GitHub Actions-gränssnittet
+
+jobs:
+  export_code:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Create Markdown file with code
+        run: |
+          mkdir -p output
+          touch output/code.md
+          for file in $(find . -name "*.cs"); do
+            echo "## $file" >> output/code.md
+            echo '```csharp' >> output/code.md
+            cat "$file" >> output/code.md
+            echo '```' >> output/code.md
+            echo "" >> output/code.md
+          done
+
+      - name: Upload Markdown file
+        uses: actions/upload-artifact@v2
+        with:
+          name: code-markdown
+          path: output/code.md
