@@ -1,7 +1,7 @@
 name: Export Code to Markdown
 
 on:
-  workflow_dispatch:  # Trigger för manuell körning från GitHub Actions-gränssnittet
+  workflow_dispatch:
 
 jobs:
   export_code:
@@ -10,6 +10,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
 
       - name: Create Markdown file with code
         run: |
