@@ -1,10 +1,11 @@
-namespace WeLoveMushrooms.Configurations;
-
-public class MongoDbOptions
+namespace WeLoveMushrooms.Configurations
 {
-    public const string SectionName = "MongoDb";
+    public class MongoDbOptions
+    {
+        public const string SectionName = "MongoDb";
 
-    public string ConnectionString { get; set; } = string.Empty;
-    public string DatabaseName { get; set; } = string.Empty;
-    public string SubscribersCollectionName { get; set; } = string.Empty;
+        public string? ConnectionString { get; set; }
+        public string? DatabaseName { get; set; }
+        public string? SubscribersCollectionName { get; set; }
+    }
 }
